@@ -50,14 +50,14 @@ public class FirstPersonController : MonoBehaviour
 				
 					if (t.position.x < halfScreenWidth && leftFingerId == -1)
 					{
-						leftFingerId = t.fingerId;
 						Debug.Log("Tracking left finger input.");
+						leftFingerId = t.fingerId;
 					}
 					
 					else if (t.position.x > halfScreenWidth && rightFingerId == -1)
 					{
-						rightFingerId = t.fingerId;
 						Debug.Log("Tracking right finger input.");
+						rightFingerId = t.fingerId;
 					}
 					
 				break;
@@ -69,14 +69,14 @@ public class FirstPersonController : MonoBehaviour
 					
 					if (t.fingerId == leftFingerId)
 					{
-						leftFingerId = -1;
 						Debug.Log("Stopped tracking left finger input.");
+						leftFingerId = -1;
 					}
 					
 					else if (t.fingerId == rightFingerId)
 					{
-						rightFingerId = -1;
 						Debug.Log("Stopped tracking right finger input.");
+						rightFingerId = -1;
 					}
 					
 				break;

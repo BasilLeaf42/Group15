@@ -16,7 +16,7 @@ public class Weapon : MonoBehaviour
 	public float fireTimer;
 	public int currentAmmo;
 	public int totalAmmo = 5;
-	public float reloadTimer = 1f;
+	public float reloadTimer = 2f;
 	private bool isReloading = false;
 	
 	// Ammo counter variables
@@ -38,6 +38,7 @@ public class Weapon : MonoBehaviour
 		
 		// Spawn a bullet
 		bPool.ChooseFromPool(firePoint.position, bulletVelocity);
+		Debug.Log("Fired a bullet.");
 		
 		// Remove a bullet from the magazine
 		currentAmmo = currentAmmo - 1;
@@ -46,16 +47,16 @@ public class Weapon : MonoBehaviour
 	// Player presses fire button
 	public void FirePress()
 	{
-		Fire();
 		Debug.Log("Fire button pressed.");
+		Fire();
 	}
 	
 	// Player releases fire button
 	public void FireRelease()
 	{
+		Debug.Log("Fire button released.");
 		fireTimer = 0;
 		isFiring = false;
-		Debug.Log("Fire button released.");
 	}
 
     // Update is called once per frame
@@ -80,8 +81,8 @@ public class Weapon : MonoBehaviour
 			// Checks if the weapon cooldown is active
 			if (fireTimer > 0)
 			{
-				fireTimer = fireTimer - Time.deltaTime;
 				Debug.Log("Cannot fire while cooldown is active.");
+				fireTimer = fireTimer - Time.deltaTime;
 			}
 			
 			// Fire!
@@ -97,14 +98,47 @@ public class Weapon : MonoBehaviour
 	// Reload function
 	IEnumerator Reload()
 	{
-		// Reload start
-		isReloading = true;
-		Debug.Log("Reloading...");
-		yield return new WaitForSeconds(reloadTimer);
+		// Prevent reload if magazine is already full
+		if (currentAmmo == totalAmmo)
+		{
+			Debug.Log("Cannot reload full magazine.");
+		}
 		
-		// Reload complete
-		currentAmmo = totalAmmo;
-		isReloading = false;
-		Debug.Log("Reloading complete.");
+		else
+		{
+			// Reload start
+			isReloading = true;
+			Debug.Log("Reloading...");
+			yield return new WaitForSeconds(reloadTimer);
+			
+			// Reload complete
+			currentAmmo = totalAmmo;
+			isReloading = false;
+			Debug.Log("Reloading complete.");
+		}
+	}
+	
+	// Player presses reload button
+	public void ReloadPress()
+	{
+		Debug.Log("Reload button pressed.");
+		
+		// Prevent reload if magazine is already full
+		if (currentAmmo == totalAmmo)
+		{
+			Debug.Log("Cannot reload full magazine.");
+		}
+		
+		else
+		{
+			// Begin reloading
+			StartCoroutine(Reload());
+		}
+	}
+	
+	// Player releases reload button
+	public void ReloadRelease()
+	{
+		Debug.Log("Reload button released.");
 	}
 }

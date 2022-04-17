@@ -35,7 +35,7 @@ public class Bullet : MonoBehaviour
 	// Detects bullet impacts
 	public void OnCollision(Collider other)
 	{
-		Debug.Log("Bullet impact.");
+		Debug.Log("Bullet impact!");
 		Deactivate();
 	}
 }
