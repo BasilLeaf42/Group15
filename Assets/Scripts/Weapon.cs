@@ -8,16 +8,26 @@ public class Weapon : MonoBehaviour
     BulletPool bPool;
 	public Transform camera;
 	public Transform firePoint;
+	public Animator animator;
 	
 	// Weapon stat variables
 	public float bulletSpeed = 10;
 	public bool isFiring;
-	public float fireDelay;
+	public float fireDelay = 20f;
 	public float fireTimer;
 	public int currentAmmo;
 	public int totalAmmo = 5;
-	public float reloadTimer = 10f;
+	public float reloadTimer = 100f;
 	private bool isReloading = false;
+	private bool isRechambering = false;
+	
+	// Scope things
+	private bool isScoped = false;
+	public GameObject scopeReticle;
+	public GameObject weaponCamera;
+	public Camera PlayerCamera;
+	public float scopeFOV = 15f;
+	private float previousFOV;
 	
 	// Ammo counter variables
 	public InputField currentAmmoField;
@@ -28,6 +38,50 @@ public class Weapon : MonoBehaviour
     {
         currentAmmo = totalAmmo;
 		bPool = BulletPool.main;
+		scopeReticle.SetActive(false);
+		weaponCamera.SetActive(true);
+    }
+	
+	// Update is called once per frame
+    void Update()
+    {
+		// Return if the player is reloading
+		if (isReloading == true)
+		{
+			return;
+		}
+		
+		// Automatically reloads if the magazine is empty and the player is not reloading
+		else if ((currentAmmo <= 0) && (isReloading == false))
+		{
+			StartCoroutine(Reload());
+			return;
+		}
+		
+		// Return if the player is reloading
+		if (isRechambering == true)
+		{
+			return;
+		}
+		
+		// Checks if the player is firing
+		if (isFiring == true)
+		{
+			// Checks if the weapon cooldown is active
+			if (fireTimer > 0 && isRechambering == true)
+			{
+				Debug.Log("Cannot fire while cooldown is active.");
+				fireTimer = fireTimer - Time.deltaTime;
+			}
+			
+			// Fire!
+			else
+			{
+				fireTimer = fireDelay;
+				Fire();
+				Debug.Log("Fired a bullet.");
+			}
+		}
     }
 	
 	// Spawns a bullet from the BulletPool
@@ -37,6 +91,12 @@ public class Weapon : MonoBehaviour
 		if (isReloading == true)
 		{
 			Debug.Log("Cannot fire while reloading.");
+		}
+		
+		// Refuse to fire if rechamberiqng
+		else if (isRechambering == true)
+		{
+			Debug.Log("Cannot fire while rechambering.");
 		}
 		
 		else
@@ -50,6 +110,10 @@ public class Weapon : MonoBehaviour
 			
 			// Remove a bullet from the magazine
 			currentAmmo = currentAmmo - 1;
+			
+			// Rechamber
+			isRechambering = true;
+			StartCoroutine(RateOfFire());
 		}
 	}
 	
@@ -67,51 +131,74 @@ public class Weapon : MonoBehaviour
 		fireTimer = 0;
 		isFiring = false;
 	}
-
-    // Update is called once per frame
-    void Update()
-    {
-		// Return if the player is reloading
+	
+	// (Un)scope function
+	IEnumerator Scope()
+	{
+		// Refuse to scope in while reloading
 		if (isReloading == true)
 		{
-			return;
+			Debug.Log("Cannot scope in while reloading.");
 		}
 		
-		// Automatically reloads if the magazine is empty and the player is not reloading
-		else if ((currentAmmo <= 0) && (isReloading == false))
+		// Scope in
+		else if (isScoped == false)
 		{
-			StartCoroutine(Reload());
-			return;
+			Debug.Log("Scoping in...");
+			animator.SetBool("Scoped", true);
+			yield return new WaitForSeconds(0.25f);
+			scopeReticle.SetActive(true);
+			weaponCamera.SetActive(false);
+			previousFOV = PlayerCamera.fieldOfView;
+			PlayerCamera.fieldOfView = scopeFOV;
+			isScoped = true;
 		}
 		
-		// Checks if the player is firing
-		if (isFiring == true)
+		// Scope out
+		else
 		{
-			// Checks if the weapon cooldown is active
-			if (fireTimer > 0)
-			{
-				Debug.Log("Cannot fire while cooldown is active.");
-				fireTimer = fireTimer - Time.deltaTime;
-			}
-			
-			// Fire!
-			else
-			{
-				fireTimer = fireDelay;
-				Fire();
-				Debug.Log("Fired a bullet.");
-			}
+			Debug.Log("Scoping out...");
+			animator.SetBool("Scoped", false);
+			scopeReticle.SetActive(false);
+			weaponCamera.SetActive(true);
+			PlayerCamera.fieldOfView = previousFOV;
+			isScoped = false;
 		}
-    }
+	}
+	
+	// Player presses fire button
+	public void ScopePress()
+	{
+		Debug.Log("Scope button pressed.");
+		StartCoroutine(Scope());
+	}
+	
+	// Player releases fire button
+	public void ScopeRelease()
+	{
+		Debug.Log("Scope button released.");
+	}
 	
 	// Reload function
 	IEnumerator Reload()
 	{
+		// Unscope if scoped in
+		if (isScoped == true)
+		{
+			Debug.Log("Scoping out to reload.");
+			animator.SetBool("Scoped", false);
+			scopeReticle.SetActive(false);
+			weaponCamera.SetActive(true);
+			PlayerCamera.fieldOfView = previousFOV;
+			isScoped = false;
+		}
+		
 		// Prevent reload if magazine and chamber are already full
 		if (currentAmmo == totalAmmo + 1)
 		{
 			Debug.Log("Magazine and chamber already full; cannot reload.");
 		}
+		
 		
 		// If the rifle can't hold an extra round in the chamber, use this code instead
 		// Prevent reload if the magazine is already full
@@ -192,4 +279,17 @@ public class Weapon : MonoBehaviour
 	{
 		Debug.Log("Reload button released.");
 	}
+
+	// Rate of Fire function
+	IEnumerator RateOfFire()
+	{
+		if (isRechambering == true)
+		{
+			Debug.Log("Rechambering...");
+			yield return new WaitForSeconds(fireDelay);
+			Debug.Log("Ready to fire.");
+			isRechambering = false;
+		}
+	}
 }
+	
