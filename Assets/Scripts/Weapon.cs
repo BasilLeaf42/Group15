@@ -29,6 +29,13 @@ public class Weapon : MonoBehaviour
 	public float scopeFOV = 15f;
 	private float previousFOV;
 	
+	// Audio things
+	public AudioSource[] sounds;
+	public AudioSource fireSound;
+	public AudioSource rechamberSound;
+	public AudioSource reloadSound;
+	public AudioSource scopeSound;
+	
 	// Ammo counter variables
 	public Text ammoCounter;
 	
@@ -40,6 +47,13 @@ public class Weapon : MonoBehaviour
 		scopeReticle.SetActive(false);
 		weaponCamera.SetActive(true);
 		ammoCounter.text = currentAmmo.ToString() + " | " + totalAmmo.ToString() + " (+1)";
+		
+		// Audio things
+		sounds = GetComponents<AudioSource>();
+		fireSound = sounds[0];
+		rechamberSound = sounds[1];
+		reloadSound = sounds[2];
+		scopeSound = sounds[3];
     }
 	
 	// Update is called once per frame
@@ -59,13 +73,13 @@ public class Weapon : MonoBehaviour
 		}
 		
 		// Return if the player is reloading
-		if (isRechambering == true)
+		else if (isRechambering == true)
 		{
 			return;
 		}
 		
 		// Checks if the player is firing
-		if (isFiring == true)
+		else if (isFiring == true)
 		{
 			// Checks if the weapon cooldown is active
 			if (fireTimer > 0 && isRechambering == true)
@@ -106,11 +120,24 @@ public class Weapon : MonoBehaviour
 			
 			// Fire!
 			bPool.ChooseFromPool(firePoint.position, bulletVelocity);
+			fireSound.Play();
+			
+			// Only play firing animation when unscoped
+			if (isScoped == false)
+			{
+				animator.SetTrigger("Shoot");
+			}
 			Debug.Log("Fired a bullet.");
 			
 			// Remove a bullet from the magazine and update ammo counter
 			currentAmmo = currentAmmo - 1;
 			ammoCounter.text = currentAmmo.ToString() + " | " + totalAmmo.ToString() + " (+1)";
+			
+			// Only play rechambering sound if the gun is not now empty
+			if (currentAmmo > 0)
+			{
+				rechamberSound.Play();
+			}
 			
 			// Rechamber
 			isRechambering = true;
@@ -148,6 +175,7 @@ public class Weapon : MonoBehaviour
 			Debug.Log("Scoping in...");
 			animator.SetBool("Scoped", true);
 			yield return new WaitForSeconds(0.25f);
+			scopeSound.Play();
 			scopeReticle.SetActive(true);
 			weaponCamera.SetActive(false);
 			previousFOV = PlayerCamera.fieldOfView;
@@ -160,6 +188,7 @@ public class Weapon : MonoBehaviour
 		{
 			Debug.Log("Scoping out...");
 			animator.SetBool("Scoped", false);
+			scopeSound.Play();
 			scopeReticle.SetActive(false);
 			weaponCamera.SetActive(true);
 			PlayerCamera.fieldOfView = previousFOV;
@@ -188,6 +217,7 @@ public class Weapon : MonoBehaviour
 		{
 			Debug.Log("Scoping out to reload.");
 			animator.SetBool("Scoped", false);
+			scopeSound.Play();
 			scopeReticle.SetActive(false);
 			weaponCamera.SetActive(true);
 			PlayerCamera.fieldOfView = previousFOV;
@@ -229,7 +259,11 @@ public class Weapon : MonoBehaviour
 			isReloading = true;
 			Debug.Log("Reloading from empty...");
 			animator.SetTrigger("Reload");
-			yield return new WaitForSeconds(3.3f); // reloadTimer
+			yield return new WaitForSeconds(0.7f);
+			reloadSound.Play();
+			yield return new WaitForSeconds(1.3f);
+			rechamberSound.Play();
+			yield return new WaitForSeconds(1.3f); // reloadTimer
 			
 			// Reload complete
 			currentAmmo = totalAmmo;
@@ -245,7 +279,11 @@ public class Weapon : MonoBehaviour
 			isReloading = true;
 			Debug.Log("Reloading with a round in the chamber...");
 			animator.SetTrigger("Reload");
-			yield return new WaitForSeconds(3.3f); // reloadTimer
+			yield return new WaitForSeconds(0.7f);
+			reloadSound.Play();
+			yield return new WaitForSeconds(1.3f);
+			rechamberSound.Play();
+			yield return new WaitForSeconds(1.3f); // reloadTimer
 			
 			// Reload complete
 			currentAmmo = totalAmmo + 1;
@@ -291,6 +329,7 @@ public class Weapon : MonoBehaviour
 		if (isRechambering == true)
 		{
 			Debug.Log("Rechambering...");
+			// rechamberSound.Play();
 			yield return new WaitForSeconds(1.2f); // fireDelay
 			Debug.Log("Ready to fire.");
 			isRechambering = false;
