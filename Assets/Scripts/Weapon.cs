@@ -13,15 +13,15 @@ public class Weapon : MonoBehaviour
 	// Weapon stat variables
 	public float bulletSpeed = 10;
 	public bool isFiring;
-	public float fireDelay = 20f;
+	public float fireDelay = 1.2f;
 	public float fireTimer;
-	public int currentAmmo;
+	public int currentAmmo = 5;
 	public int totalAmmo = 5;
-	public float reloadTimer = 100f;
+	public float reloadTimer = 3.3f;
+	
+	// Animation things
 	private bool isReloading = false;
 	private bool isRechambering = false;
-	
-	// Scope things
 	private bool isScoped = false;
 	public GameObject scopeReticle;
 	public GameObject weaponCamera;
@@ -30,8 +30,7 @@ public class Weapon : MonoBehaviour
 	private float previousFOV;
 	
 	// Ammo counter variables
-	public InputField currentAmmoField;
-	public InputField totalAmmoField;
+	public Text ammoCounter;
 	
 	// Start is called before the first frame update
     private void Start()
@@ -40,6 +39,7 @@ public class Weapon : MonoBehaviour
 		bPool = BulletPool.main;
 		scopeReticle.SetActive(false);
 		weaponCamera.SetActive(true);
+		ammoCounter.text = currentAmmo.ToString() + " | " + totalAmmo.ToString() + " (+1)";
     }
 	
 	// Update is called once per frame
@@ -77,7 +77,7 @@ public class Weapon : MonoBehaviour
 			// Fire!
 			else
 			{
-				fireTimer = fireDelay;
+				fireTimer = 11f;
 				Fire();
 				Debug.Log("Fired a bullet.");
 			}
@@ -104,12 +104,13 @@ public class Weapon : MonoBehaviour
 			// Initialize bullet velocity
 			Vector3 bulletVelocity = camera.forward * bulletSpeed;
 			
-			// Spawn a bullet
+			// Fire!
 			bPool.ChooseFromPool(firePoint.position, bulletVelocity);
 			Debug.Log("Fired a bullet.");
 			
-			// Remove a bullet from the magazine
+			// Remove a bullet from the magazine and update ammo counter
 			currentAmmo = currentAmmo - 1;
+			ammoCounter.text = currentAmmo.ToString() + " | " + totalAmmo.ToString() + " (+1)";
 			
 			// Rechamber
 			isRechambering = true;
@@ -227,10 +228,12 @@ public class Weapon : MonoBehaviour
 			// Reload start
 			isReloading = true;
 			Debug.Log("Reloading from empty...");
-			yield return new WaitForSeconds(reloadTimer);
+			animator.SetTrigger("Reload");
+			yield return new WaitForSeconds(3.3f); // reloadTimer
 			
 			// Reload complete
 			currentAmmo = totalAmmo;
+			ammoCounter.text = currentAmmo.ToString() + " | " + totalAmmo.ToString() + " (+1)";
 			isReloading = false;
 			Debug.Log("Reloading complete.");
 		}
@@ -241,10 +244,12 @@ public class Weapon : MonoBehaviour
 			// Reload start
 			isReloading = true;
 			Debug.Log("Reloading with a round in the chamber...");
-			yield return new WaitForSeconds(reloadTimer);
+			animator.SetTrigger("Reload");
+			yield return new WaitForSeconds(3.3f); // reloadTimer
 			
 			// Reload complete
 			currentAmmo = totalAmmo + 1;
+			ammoCounter.text = currentAmmo.ToString() + " | " + totalAmmo.ToString() + " (+1)";
 			isReloading = false;
 			Debug.Log("Reloading complete. Extra round!");
 		}
@@ -286,7 +291,7 @@ public class Weapon : MonoBehaviour
 		if (isRechambering == true)
 		{
 			Debug.Log("Rechambering...");
-			yield return new WaitForSeconds(fireDelay);
+			yield return new WaitForSeconds(1.2f); // fireDelay
 			Debug.Log("Ready to fire.");
 			isRechambering = false;
 		}
