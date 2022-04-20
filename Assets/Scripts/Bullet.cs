@@ -33,9 +33,16 @@ public class Bullet : MonoBehaviour
 	}
 	
 	// Detects bullet impacts
-	public void OnCollision(Collider other)
+	public void OnTriggerEnter(Collider other)
 	{
 		Debug.Log("Bullet impact!");
+		if(other.isTrigger)
+        {
+			ScoreManager.instance.AddHSPoint();
+		}
+		else
+			ScoreManager.instance.AddPoint();
+		Destroy(other.gameObject);
 		Deactivate();
 	}
 }
