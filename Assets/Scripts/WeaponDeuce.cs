@@ -1,11 +1,12 @@
-// Weapon file for Steyr Scout
+// Weapon file for Double Deuce
+// NOTE: The Double Deuce has no rechamber time and can't hold +1 in the chamber
 
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Weapon : MonoBehaviour
+public class WeaponDeuce : MonoBehaviour
 {
     BulletPool bPool;
 	public Transform camera;
@@ -15,11 +16,9 @@ public class Weapon : MonoBehaviour
 	// Weapon stat variables
 	public float bulletSpeed = 10;
 	public bool isFiring;
-	public float fireDelay = 1.2f;
-	public float fireTimer;
-	public int currentAmmo = 4;
-	public int totalAmmo = 4;
-	public float reloadTimer = 3.3f;
+	public int currentAmmo = 2;
+	public int totalAmmo = 2;
+	public float reloadTimer = 2.9f;
 	
 	// Animation things
 	private bool isReloading = false;
@@ -28,13 +27,12 @@ public class Weapon : MonoBehaviour
 	public GameObject scopeReticle;
 	public GameObject weaponCamera;
 	public Camera PlayerCamera;
-	public float scopeFOV = 20f;
+	public float scopeFOV = 60f;
 	private float previousFOV;
 	
 	// Audio things
 	public AudioSource[] sounds;
 	public AudioSource fireSound;
-	public AudioSource rechamberSound;
 	public AudioSource reloadSound;
 	public AudioSource scopeSound;
 	
@@ -48,7 +46,7 @@ public class Weapon : MonoBehaviour
 		bPool = BulletPool.main;
 		scopeReticle.SetActive(false);
 		weaponCamera.SetActive(true);
-		ammoCounter.text = currentAmmo.ToString() + " | " + totalAmmo.ToString() + " (+1)";
+		ammoCounter.text = currentAmmo.ToString() + " | " + totalAmmo.ToString();
 		
 		// Audio things
 		// sounds = GetComponents<AudioSource>();
@@ -84,16 +82,13 @@ public class Weapon : MonoBehaviour
 		else if (isFiring == true)
 		{
 			// Checks if the weapon cooldown is active
-			if (fireTimer > 0 && isRechambering == true)
+			if (isRechambering == true)
 			{
 				Debug.Log("Cannot fire while cooldown is active.");
-				fireTimer = fireTimer - Time.deltaTime;
 			}
 			
-			// Fire!
 			else
 			{
-				fireTimer = 11f;
 				Fire();
 				Debug.Log("Fired a bullet.");
 			}
@@ -129,17 +124,12 @@ public class Weapon : MonoBehaviour
 			{
 				animator.SetTrigger("Shoot");
 			}
+			
 			Debug.Log("Fired a bullet.");
 			
 			// Remove a bullet from the magazine and update ammo counter
 			currentAmmo = currentAmmo - 1;
-			ammoCounter.text = currentAmmo.ToString() + " | " + totalAmmo.ToString() + " (+1)";
-			
-			// Only play rechambering sound if the gun is not now empty
-			if (currentAmmo > 0)
-			{
-				rechamberSound.Play();
-			}
+			ammoCounter.text = currentAmmo.ToString() + " | " + totalAmmo.ToString();
 			
 			// Rechamber
 			isRechambering = true;
@@ -158,7 +148,6 @@ public class Weapon : MonoBehaviour
 	public void FireRelease()
 	{
 		Debug.Log("Fire button released.");
-		fireTimer = 0;
 		isFiring = false;
 	}
 	
@@ -176,9 +165,8 @@ public class Weapon : MonoBehaviour
 		{
 			Debug.Log("Scoping in...");
 			animator.SetBool("Scoped", true);
-			yield return new WaitForSeconds(0.2f);
+			yield return new WaitForSeconds(0.4f);
 			scopeSound.Play();
-			scopeReticle.SetActive(true);
 			weaponCamera.SetActive(false);
 			previousFOV = PlayerCamera.fieldOfView;
 			PlayerCamera.fieldOfView = scopeFOV;
@@ -191,7 +179,6 @@ public class Weapon : MonoBehaviour
 			Debug.Log("Scoping out...");
 			animator.SetBool("Scoped", false);
 			scopeSound.Play();
-			scopeReticle.SetActive(false);
 			weaponCamera.SetActive(true);
 			PlayerCamera.fieldOfView = previousFOV;
 			isScoped = false;
@@ -220,24 +207,15 @@ public class Weapon : MonoBehaviour
 			Debug.Log("Scoping out to reload.");
 			animator.SetBool("Scoped", false);
 			scopeSound.Play();
-			scopeReticle.SetActive(false);
 			weaponCamera.SetActive(true);
 			PlayerCamera.fieldOfView = previousFOV;
 			isScoped = false;
 		}
 		
-		// Prevent reload if magazine and chamber are already full
-		if (currentAmmo == totalAmmo + 1)
-		{
-			Debug.Log("Magazine and chamber already full; cannot reload.");
-		}
-		
-		
-		// If the rifle can't hold an extra round in the chamber, use this code instead
 		// Prevent reload if the magazine is already full
-		/* if (currentAmmo == totalAmmo)
+		if (currentAmmo == totalAmmo)
 		{
-			Debug.Log("Magazine already full; cannot reload.");
+			Debug.Log("Weapon already full; cannot reload.");
 		} 
 		
 		// Reload!
@@ -246,50 +224,16 @@ public class Weapon : MonoBehaviour
 			// Reload start
 			isReloading = true;
 			Debug.Log("Reloading...");
-			yield return new WaitForSeconds(reloadTimer);
-			
-			// Reload complete
-			currentAmmo = totalAmmo;
-			isReloading = false;
-			Debug.Log("Reloading complete.");
-		}*/
-		
-		// Reload from empty
-		else if (currentAmmo == 0)
-		{
-			// Reload start
-			isReloading = true;
-			Debug.Log("Reloading from empty...");
-			animator.SetTrigger("ReloadEmpty");
-			yield return new WaitForSeconds(0.7f);
-			reloadSound.Play();
-			yield return new WaitForSeconds(1.3f);
-			rechamberSound.Play();
-			yield return new WaitForSeconds(1.3f); // reloadTimer
-			
-			// Reload complete
-			currentAmmo = totalAmmo;
-			ammoCounter.text = currentAmmo.ToString() + " | " + totalAmmo.ToString() + " (+1)";
-			isReloading = false;
-			Debug.Log("Reloading complete.");
-		}
-		
-		// Reloading closed-bolt rifle with a round already chambered
-		else
-		{
-			// Reload start
-			isReloading = true;
-			Debug.Log("Reloading with a round in the chamber...");
 			animator.SetTrigger("Reload");
 			yield return new WaitForSeconds(0.7f);
 			reloadSound.Play();
-			yield return new WaitForSeconds(1.3f);
+			yield return new WaitForSeconds(2.1f);
 			
 			// Reload complete
-			currentAmmo = totalAmmo + 1;
-			ammoCounter.text = currentAmmo.ToString() + " | " + totalAmmo.ToString() + " (+1)";
+			currentAmmo = totalAmmo;
+			ammoCounter.text = currentAmmo.ToString() + " | " + totalAmmo.ToString();
 			isReloading = false;
-			Debug.Log("Reloading complete. Extra round!");
+			Debug.Log("Reloading complete.");
 		}
 	}
 	
@@ -299,16 +243,10 @@ public class Weapon : MonoBehaviour
 		Debug.Log("Reload button pressed.");
 		
 		// Prevent reload if magazine and chamber are already full
-		if (currentAmmo == totalAmmo + 1)
+		if (currentAmmo == totalAmmo)
 		{
-			Debug.Log("Magazine and chamber already full; cannot reload.");
+			Debug.Log("Weapon already full; cannot reload.");
 		}
-		
-		// If the rifle can't hold an extra round in the chamber, use this code instead
-		/* if (currentAmmo == totalAmmo)
-		{
-			Debug.Log("Magazine already full; cannot reload.");
-		} */
 		
 		else
 		{
@@ -322,7 +260,7 @@ public class Weapon : MonoBehaviour
 	{
 		Debug.Log("Reload button released.");
 	}
-
+	
 	// Rate of Fire function
 	IEnumerator RateOfFire()
 	{
@@ -330,7 +268,7 @@ public class Weapon : MonoBehaviour
 		{
 			Debug.Log("Rechambering...");
 			// rechamberSound.Play();
-			yield return new WaitForSeconds(1.2f); // fireDelay
+			yield return new WaitForSeconds(0.3f); // fireDelay
 			Debug.Log("Ready to fire.");
 			isRechambering = false;
 		}

@@ -1,11 +1,11 @@
-// Weapon file for Steyr Scout
+// Weapon file for Mossberg Patriot
 
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Weapon : MonoBehaviour
+public class WeaponPatriot : MonoBehaviour
 {
     BulletPool bPool;
 	public Transform camera;
@@ -15,11 +15,11 @@ public class Weapon : MonoBehaviour
 	// Weapon stat variables
 	public float bulletSpeed = 10;
 	public bool isFiring;
-	public float fireDelay = 1.2f;
+	public float fireDelay = 1.6f;
 	public float fireTimer;
-	public int currentAmmo = 4;
-	public int totalAmmo = 4;
-	public float reloadTimer = 3.3f;
+	public int currentAmmo = 5;
+	public int totalAmmo = 5;
+	public float reloadTimer = 4.0f;
 	
 	// Animation things
 	private bool isReloading = false;
@@ -28,7 +28,7 @@ public class Weapon : MonoBehaviour
 	public GameObject scopeReticle;
 	public GameObject weaponCamera;
 	public Camera PlayerCamera;
-	public float scopeFOV = 20f;
+	public float scopeFOV = 10f;
 	private float previousFOV;
 	
 	// Audio things
@@ -43,8 +43,9 @@ public class Weapon : MonoBehaviour
 	
 	// Start is called before the first frame update
     private void Start()
-    {
-        currentAmmo = totalAmmo;
+    {		
+		// Weapon initialization
+		currentAmmo = totalAmmo;
 		bPool = BulletPool.main;
 		scopeReticle.SetActive(false);
 		weaponCamera.SetActive(true);
@@ -124,11 +125,8 @@ public class Weapon : MonoBehaviour
 			bPool.ChooseFromPool(firePoint.position, bulletVelocity);
 			fireSound.Play();
 			
-			// Only play firing animation when unscoped
-			if (isScoped == false)
-			{
-				animator.SetTrigger("Shoot");
-			}
+			// Play firing animation
+			animator.SetTrigger("Shoot");
 			Debug.Log("Fired a bullet.");
 			
 			// Remove a bullet from the magazine and update ammo counter
@@ -176,7 +174,7 @@ public class Weapon : MonoBehaviour
 		{
 			Debug.Log("Scoping in...");
 			animator.SetBool("Scoped", true);
-			yield return new WaitForSeconds(0.2f);
+			yield return new WaitForSeconds(0.32f);
 			scopeSound.Play();
 			scopeReticle.SetActive(true);
 			weaponCamera.SetActive(false);
@@ -261,11 +259,11 @@ public class Weapon : MonoBehaviour
 			isReloading = true;
 			Debug.Log("Reloading from empty...");
 			animator.SetTrigger("ReloadEmpty");
-			yield return new WaitForSeconds(0.7f);
+			yield return new WaitForSeconds(0.2f);
 			reloadSound.Play();
-			yield return new WaitForSeconds(1.3f);
+			yield return new WaitForSeconds(2.9f);
 			rechamberSound.Play();
-			yield return new WaitForSeconds(1.3f); // reloadTimer
+			yield return new WaitForSeconds(1.6f); // reloadTimer
 			
 			// Reload complete
 			currentAmmo = totalAmmo;
@@ -281,9 +279,9 @@ public class Weapon : MonoBehaviour
 			isReloading = true;
 			Debug.Log("Reloading with a round in the chamber...");
 			animator.SetTrigger("Reload");
-			yield return new WaitForSeconds(0.7f);
+			yield return new WaitForSeconds(0.2f);
 			reloadSound.Play();
-			yield return new WaitForSeconds(1.3f);
+			yield return new WaitForSeconds(2.9f);
 			
 			// Reload complete
 			currentAmmo = totalAmmo + 1;
@@ -330,7 +328,7 @@ public class Weapon : MonoBehaviour
 		{
 			Debug.Log("Rechambering...");
 			// rechamberSound.Play();
-			yield return new WaitForSeconds(1.2f); // fireDelay
+			yield return new WaitForSeconds(1.6f); // fireDelay
 			Debug.Log("Ready to fire.");
 			isRechambering = false;
 		}
