@@ -8,6 +8,7 @@ public class GameSave : MonoBehaviour
     [SerializeField] public bool level1Complete;
     [SerializeField] public bool level2Complete;
     [SerializeField] public bool level3Complete;
+    [SerializeField] public int weapon;
 
     // Start is called before the first frame update
     void Start()
@@ -17,12 +18,14 @@ public class GameSave : MonoBehaviour
             level1Complete = SaveManager.instance.activeSave.level1Complete;
             level2Complete = SaveManager.instance.activeSave.level2Complete;
             level3Complete = SaveManager.instance.activeSave.level3Complete;
+            weapon = SaveManager.instance.activeSave.weapon;
         }   
         else
         {
             SaveManager.instance.activeSave.level1Complete = level1Complete;
             SaveManager.instance.activeSave.level2Complete = level2Complete;
             SaveManager.instance.activeSave.level3Complete = level3Complete;
+            weapon = SaveManager.instance.activeSave.weapon;
         }
     }
 
@@ -31,6 +34,7 @@ public class GameSave : MonoBehaviour
         SaveManager.instance.activeSave.level1Complete = level1Complete;
         SaveManager.instance.activeSave.level2Complete = level2Complete;
         SaveManager.instance.activeSave.level3Complete = level3Complete;
+        SaveManager.instance.activeSave.weapon = weapon;
     }
 
     public void level1()
@@ -46,6 +50,12 @@ public class GameSave : MonoBehaviour
     public void level3()
     {
         level3Complete = true;
+    }
+
+    public void weaponChoice(int choice)
+    {
+        weapon = choice;
+        SaveManager.instance.activeSave.weapon = weapon;
     }
 
     // Update is called once per frame
