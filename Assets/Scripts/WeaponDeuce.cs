@@ -1,5 +1,4 @@
 // Weapon file for Double Deuce
-// NOTE: The Double Deuce has no rechamber time and can't hold +1 in the chamber
 
 using System.Collections;
 using System.Collections.Generic;
@@ -24,6 +23,7 @@ public class WeaponDeuce : MonoBehaviour
 	private bool isReloading = false;
 	private bool isRechambering = false;
 	private bool isScoped = false;
+	public GameObject crosshair;
 	public GameObject scopeReticle;
 	public GameObject weaponCamera;
 	public Camera PlayerCamera;
@@ -38,22 +38,26 @@ public class WeaponDeuce : MonoBehaviour
 	
 	// Ammo counter variables
 	public Text ammoCounter;
+	public GameObject patriotCounter;
+	public GameObject scoutCounter;
+	public GameObject deuceCounter;
 	
 	// Start is called before the first frame update
     private void Start()
     {
         currentAmmo = totalAmmo;
 		bPool = BulletPool.main;
-		scopeReticle.SetActive(false);
-		weaponCamera.SetActive(true);
-		ammoCounter.text = currentAmmo.ToString() + " | " + totalAmmo.ToString();
 		
-		// Audio things
-		// sounds = GetComponents<AudioSource>();
-		// fireSound = sounds[0];
-		// rechamberSound = sounds[1];
-		// reloadSound = sounds[2];
-		// scopeSound = sounds[3];
+		// Activate crosshair by default
+		scopeReticle.SetActive(false);
+		crosshair.SetActive(true);
+		weaponCamera.SetActive(true);
+		
+		// Initialize ammo counter
+		patriotCounter.SetActive(false);
+		scoutCounter.SetActive(false);
+		deuceCounter.SetActive(true);
+		ammoCounter.text = currentAmmo.ToString() + " | " + totalAmmo.ToString();
     }
 	
 	// Update is called once per frame
@@ -167,6 +171,7 @@ public class WeaponDeuce : MonoBehaviour
 			animator.SetBool("Scoped", true);
 			yield return new WaitForSeconds(0.4f);
 			scopeSound.Play();
+			crosshair.SetActive(false);
 			weaponCamera.SetActive(false);
 			previousFOV = PlayerCamera.fieldOfView;
 			PlayerCamera.fieldOfView = scopeFOV;
@@ -179,6 +184,7 @@ public class WeaponDeuce : MonoBehaviour
 			Debug.Log("Scoping out...");
 			animator.SetBool("Scoped", false);
 			scopeSound.Play();
+			crosshair.SetActive(true);
 			weaponCamera.SetActive(true);
 			PlayerCamera.fieldOfView = previousFOV;
 			isScoped = false;
@@ -207,6 +213,7 @@ public class WeaponDeuce : MonoBehaviour
 			Debug.Log("Scoping out to reload.");
 			animator.SetBool("Scoped", false);
 			scopeSound.Play();
+			crosshair.SetActive(true);
 			weaponCamera.SetActive(true);
 			PlayerCamera.fieldOfView = previousFOV;
 			isScoped = false;
@@ -225,9 +232,9 @@ public class WeaponDeuce : MonoBehaviour
 			isReloading = true;
 			Debug.Log("Reloading...");
 			animator.SetTrigger("Reload");
-			yield return new WaitForSeconds(0.7f);
+			yield return new WaitForSeconds(0.6f);
 			reloadSound.Play();
-			yield return new WaitForSeconds(2.1f);
+			yield return new WaitForSeconds(1.9f);
 			
 			// Reload complete
 			currentAmmo = totalAmmo;

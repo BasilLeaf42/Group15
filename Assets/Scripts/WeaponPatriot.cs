@@ -25,6 +25,7 @@ public class WeaponPatriot : MonoBehaviour
 	private bool isReloading = false;
 	private bool isRechambering = false;
 	private bool isScoped = false;
+	public GameObject crosshair;
 	public GameObject scopeReticle;
 	public GameObject weaponCamera;
 	public Camera PlayerCamera;
@@ -40,23 +41,26 @@ public class WeaponPatriot : MonoBehaviour
 	
 	// Ammo counter variables
 	public Text ammoCounter;
+	public GameObject patriotCounter;
+	public GameObject scoutCounter;
+	public GameObject deuceCounter;
 	
 	// Start is called before the first frame update
     private void Start()
     {		
-		// Weapon initialization
 		currentAmmo = totalAmmo;
 		bPool = BulletPool.main;
-		scopeReticle.SetActive(false);
-		weaponCamera.SetActive(true);
-		ammoCounter.text = currentAmmo.ToString() + " | " + totalAmmo.ToString() + " (+1)";
 		
-		// Audio things
-		// sounds = GetComponents<AudioSource>();
-		// fireSound = sounds[0];
-		// rechamberSound = sounds[1];
-		// reloadSound = sounds[2];
-		// scopeSound = sounds[3];
+		// Activate crosshair by default
+		scopeReticle.SetActive(false);
+		crosshair.SetActive(true);
+		weaponCamera.SetActive(true);
+		
+		// Initialize ammo counter
+		patriotCounter.SetActive(true);
+		scoutCounter.SetActive(false);
+		deuceCounter.SetActive(false);
+		ammoCounter.text = currentAmmo.ToString() + " | " + totalAmmo.ToString() + " (+1)";
     }
 	
 	// Update is called once per frame
@@ -176,6 +180,7 @@ public class WeaponPatriot : MonoBehaviour
 			animator.SetBool("Scoped", true);
 			yield return new WaitForSeconds(0.32f);
 			scopeSound.Play();
+			crosshair.SetActive(false);
 			scopeReticle.SetActive(true);
 			weaponCamera.SetActive(false);
 			previousFOV = PlayerCamera.fieldOfView;
@@ -189,6 +194,7 @@ public class WeaponPatriot : MonoBehaviour
 			Debug.Log("Scoping out...");
 			animator.SetBool("Scoped", false);
 			scopeSound.Play();
+			crosshair.SetActive(true);
 			scopeReticle.SetActive(false);
 			weaponCamera.SetActive(true);
 			PlayerCamera.fieldOfView = previousFOV;
@@ -218,6 +224,7 @@ public class WeaponPatriot : MonoBehaviour
 			Debug.Log("Scoping out to reload.");
 			animator.SetBool("Scoped", false);
 			scopeSound.Play();
+			crosshair.SetActive(true);
 			scopeReticle.SetActive(false);
 			weaponCamera.SetActive(true);
 			PlayerCamera.fieldOfView = previousFOV;
@@ -229,28 +236,6 @@ public class WeaponPatriot : MonoBehaviour
 		{
 			Debug.Log("Magazine and chamber already full; cannot reload.");
 		}
-		
-		
-		// If the rifle can't hold an extra round in the chamber, use this code instead
-		// Prevent reload if the magazine is already full
-		/* if (currentAmmo == totalAmmo)
-		{
-			Debug.Log("Magazine already full; cannot reload.");
-		} 
-		
-		// Reload!
-		else
-		{
-			// Reload start
-			isReloading = true;
-			Debug.Log("Reloading...");
-			yield return new WaitForSeconds(reloadTimer);
-			
-			// Reload complete
-			currentAmmo = totalAmmo;
-			isReloading = false;
-			Debug.Log("Reloading complete.");
-		}*/
 		
 		// Reload from empty
 		else if (currentAmmo == 0)
@@ -301,12 +286,6 @@ public class WeaponPatriot : MonoBehaviour
 		{
 			Debug.Log("Magazine and chamber already full; cannot reload.");
 		}
-		
-		// If the rifle can't hold an extra round in the chamber, use this code instead
-		/* if (currentAmmo == totalAmmo)
-		{
-			Debug.Log("Magazine already full; cannot reload.");
-		} */
 		
 		else
 		{
