@@ -43,6 +43,7 @@ public class Bullet : MonoBehaviour
 		else
 			ScoreManager.instance.AddPoint();
 		Destroy(other.gameObject);
+		BeatLevel.enemies--;
 		Deactivate();
 	}
 }
