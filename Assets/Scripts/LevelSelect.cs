@@ -12,18 +12,14 @@ public class LevelSelect : MonoBehaviour
             gameObject.SetActive(true);
         }  
     }
-    public void PlayGame()
+    public void PlayGame(int l)
     {
-        SceneManager.LoadScene("level1");
+        if (l == 1) SceneManager.LoadScene("level1");
+        if (l == 2) SceneManager.LoadScene("level2");
+        if (l == 3) SceneManager.LoadScene("level3");
     }
-
     public void PlaySample()
     {
         SceneManager.LoadScene("SampleScene");
-    }
-
-    public void PlayGame2()
-    {
-        SceneManager.LoadScene("level2");
     }
 }
