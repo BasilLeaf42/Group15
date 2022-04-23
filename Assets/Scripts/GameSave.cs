@@ -25,7 +25,7 @@ public class GameSave : MonoBehaviour
             SaveManager.instance.activeSave.level1Complete = level1Complete;
             SaveManager.instance.activeSave.level2Complete = level2Complete;
             SaveManager.instance.activeSave.level3Complete = level3Complete;
-            weapon = SaveManager.instance.activeSave.weapon;
+            SaveManager.instance.activeSave.weapon = weapon;
         }
     }
 
@@ -57,6 +57,21 @@ public class GameSave : MonoBehaviour
         weapon = choice;
         SaveManager.instance.activeSave.weapon = weapon;
     }
+    // public void weaponChoice1()
+    // {
+    //     weapon = 0;
+    //     SaveManager.instance.activeSave.weapon = weapon;
+    // }
+    // public void weaponChoice2()
+    // {
+    //     weapon = 1;
+    //     SaveManager.instance.activeSave.weapon = weapon;
+    // }
+    // public void weaponChoice3()
+    // {
+    //     weapon = 2;
+    //     SaveManager.instance.activeSave.weapon = weapon;
+    // }
 
     // Update is called once per frame
     void Update()
